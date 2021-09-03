@@ -22,28 +22,34 @@
  * Distributed as-is; no warranty is given.
  ******************************************************************************/
 
+/*********
+* 1. changed M5StickC to M5Stack (lib, size)
+* 2. in drawChar(int16_t uniCode, int32_t x, uint16_t y, uint8_t font); last argument is font, not size. For set size declared M5.Lcd.setTextSize
+* 3. for get symbols height declared M5.Lcd.fontHeight()
+* 
+* *for the future* I think if add a choice of screen size by checking which device, then 
+* this can make the library more universal.
+*/
+
 #include <Arduino.h>
 #include <M5Stack.h>
 #include "tb_display.h"
 
-
-// TextSize 1 is very small on the display = hard to read
-// Textsize 2 is  readable without the need of an microscope.
-// Textsize 3 is  good readable
-
-// This code only runs with text size 2!
+// good readable - size 2 font 1. 
 #define TEXT_SIZE 2
 #define TEXT_FONT 1
-#define TEXT_HEIGHT 16
+//#define TEXT_HEIGHT 16
 //TEXT_HEIGHT = M5.Lcd.fontHeight();  // Height of text in pixel
-// Display size of M5StackC = 320x240
-// With TEXT_HEIGHT=24, the screen can display 10 rows
-// and 17 characters are placed in string
+// Display size of M5Stack = 320x240 pix
+#define SCREEN_WIDTH 320
+#define SCREEN_HEIGHT 240
 
-// screen buffer for 10 rows of 60 characters max.
+// screen buffer, for max characters. (for min font - #1 size 1 ,  probably)
 #define TEXT_BUFFER_HEIGHT_MAX 16
 #define TEXT_BUFFER_LINE_LENGTH_MAX 40
 char text_buffer[TEXT_BUFFER_HEIGHT_MAX][TEXT_BUFFER_LINE_LENGTH_MAX];
+
+int font_height;
 
 int text_buffer_height;
 int text_buffer_line_length;
@@ -70,31 +76,29 @@ boolean tb_display_word_wrap = true;
 // 2 = Button above
 // 3 = Button left
 // 4 = Button below
-// Display size of M5StickC = 160x80pixel
-// With TEXT_HEIGHT=16, the screen can display:
-//    5 rows of text in landscape mode
-//   10 rows of text in portrait mode
+
 // =============================================================
 void tb_display_init(int ScreenRotation){
   M5.Lcd.setTextSize(TEXT_SIZE);
+  font_height =  M5.Lcd.fontHeight();  //height for chosed font
   M5.Lcd.setRotation(ScreenRotation);
   switch (ScreenRotation) {
     case 1: case 3: {
       //  rows of text in landscape mode
-      text_buffer_height = 15;
-      text_buffer_line_length = 40;
-      // width of the screen in landscape mode is 160 pixel
+   //   text_buffer_height = 15;
+      text_buffer_height = floor (SCREEN_HEIGHT / font_height);  //  size screen / size symbol = number of lines
+      text_buffer_line_length = 40;  // alas, the length of the string is not so easy to get
       // A small margin on the right side prevent false print results
-      screen_max = 320-2;
+      screen_max = SCREEN_WIDTH-2;
       break;
     }
     case 2: case 4: {
       //  rows of text in portrait mode
-      text_buffer_height = 26;
+ //     text_buffer_height = 26;
+      text_buffer_height = floor (SCREEN_WIDTH / font_height);
       text_buffer_line_length = 15;
-      // width of the screen in portrait mode is 80 pixel
       // A small margin on the right side prevent false print results
-      screen_max = 240-2;
+      screen_max = SCREEN_HEIGHT-2;
       break;
     }
     default: {
@@ -120,7 +124,8 @@ void tb_display_clear(){
   text_buffer_write_pointer_x = 0;
   text_buffer_write_pointer_y = text_buffer_height-1;
   screen_xpos = SCREEN_XSTARTPOS;
-  screen_ypos = TEXT_HEIGHT*(text_buffer_height-1);
+//  screen_ypos = TEXT_HEIGHT*(text_buffer_height-1);
+  screen_ypos = font_height*(text_buffer_height-1);
 }
 
 // =============================================================
@@ -138,7 +143,8 @@ void tb_display_show(){
       xPos += M5.Lcd.drawChar(text_buffer[line][charpos],xPos,yPos,TEXT_FONT);
       charpos++;
     }
-    yPos = yPos + TEXT_HEIGHT;
+//    yPos = yPos + TEXT_HEIGHT;
+    yPos = yPos + font_height;
   }
   screen_xpos = SCREEN_XSTARTPOS;
 }
