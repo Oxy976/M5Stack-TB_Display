@@ -40,8 +40,9 @@
 #define CARDKB_ADDR 0x5F
 
 // Display brightness level
-// possible values: 7 - 15
-uint8_t screen_brightness = 10;
+// possible values: 7 - 15 ***???
+//  Brightness (0: Off - 255:Full)
+uint8_t screen_brightness = 200;
 
 // scren Rotation values:
 // 1 = Button right
@@ -54,7 +55,7 @@ int screen_orientation = 1;
 void setup() {
  M5.begin(true, false, true, true); //( LCDEnable,  SDEnable,  SerialEnable,  I2CEnable)
  M5.Speaker.mute();
-// M5.Lcd.setBrightness(screen_brightness);
+ M5.Lcd.setBrightness(screen_brightness);
 
    M5.Lcd.setTextColor(TFT_YELLOW);
 
@@ -65,12 +66,6 @@ void setup() {
 	Serial.println(" 04.02.2020 v1.3");
 	Serial.println("===================");
 
-  Serial.println("send string");
-  M5.Lcd.setCursor(0, 0);
-  M5.Lcd.printf("m5 test");
-  delay(300);
-  M5.Lcd.drawString("Hello world", 0, 60, 2);
-  delay(300);
 
   // init the text buffer display and print welcome text on the display
       Serial.println("set screen_orientation");
@@ -84,7 +79,8 @@ void loop() {
   M5.update();
 
   // change the display orientation if Button A is pressed
-/*  if (M5.BtnA.wasPressed()){
+  if (M5.BtnA.wasPressed()){
+    Serial.println("pressed btn A");
     screen_orientation++;
     if(screen_orientation > 4)
       screen_orientation = 1;
@@ -105,7 +101,7 @@ void loop() {
       }
     }
   }
-*/
+
   // Display a long Text if Button B is pressed
   if (M5.BtnB.wasPressed()){
     Serial.println("pressed btn B");
@@ -118,7 +114,8 @@ void loop() {
     else
      tb_display_print_String("\n\nwwrap OFF\n\n");
      tb_display_print_String("The quick brown fox jumps over the lazy dog and was surprised that he used all letters of the alphabet.", 85);
-//     tb_display_print_String("The quick brown fox jumps over the lazy dog and was surprised that he used all letters of the alphabet.");
+     delay(300);
+     tb_display_print_String("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
   }
 
   // check for serial input and print the received characters

@@ -26,8 +26,8 @@
 * 1. changed M5StickC to M5Stack (lib, size)
 * 2. in drawChar(int16_t uniCode, int32_t x, uint16_t y, uint8_t font); last argument is font, not size. For set size declared M5.Lcd.setTextSize
 * 3. for get symbols height declared M5.Lcd.fontHeight()
-* 
-* *for the future* I think if add a choice of screen size by checking which device, then 
+*
+* *for the future* I think if add a choice of screen size by checking which device, then
 * this can make the library more universal.
 */
 
@@ -35,7 +35,7 @@
 #include <M5Stack.h>
 #include "tb_display.h"
 
-// good readable - size 2 font 1. 
+// good readable - size 2 font 1.
 #define TEXT_SIZE 2
 #define TEXT_FONT 1
 //#define TEXT_HEIGHT 16
@@ -43,9 +43,11 @@
 // Display size of M5Stack = 320x240 pix
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
+// symbol aspect ratio
+#define FONT_WH 1.733
 
 // screen buffer, for max characters. (for min font - #1 size 1 ,  probably)
-#define TEXT_BUFFER_HEIGHT_MAX 16
+#define TEXT_BUFFER_HEIGHT_MAX 40
 #define TEXT_BUFFER_LINE_LENGTH_MAX 40
 char text_buffer[TEXT_BUFFER_HEIGHT_MAX][TEXT_BUFFER_LINE_LENGTH_MAX];
 
@@ -79,15 +81,18 @@ boolean tb_display_word_wrap = true;
 
 // =============================================================
 void tb_display_init(int ScreenRotation){
+  M5.Lcd.fillScreen(TFT_BLACK);
+  M5.Lcd.setRotation(ScreenRotation);
+  delay(10);
   M5.Lcd.setTextSize(TEXT_SIZE);
   font_height =  M5.Lcd.fontHeight();  //height for chosed font
-  M5.Lcd.setRotation(ScreenRotation);
   switch (ScreenRotation) {
     case 1: case 3: {
       //  rows of text in landscape mode
    //   text_buffer_height = 15;
       text_buffer_height = floor (SCREEN_HEIGHT / font_height);  //  size screen / size symbol = number of lines
-      text_buffer_line_length = 40;  // alas, the length of the string is not so easy to get
+  //    text_buffer_line_length = 26;  // alas, the length of the string is not so easy to get
+      text_buffer_line_length = floor (SCREEN_WIDTH * FONT_WH / font_height);
       // A small margin on the right side prevent false print results
       screen_max = SCREEN_WIDTH-2;
       break;
@@ -96,7 +101,8 @@ void tb_display_init(int ScreenRotation){
       //  rows of text in portrait mode
  //     text_buffer_height = 26;
       text_buffer_height = floor (SCREEN_WIDTH / font_height);
-      text_buffer_line_length = 15;
+//      text_buffer_line_length = 20;
+      text_buffer_line_length = floor (SCREEN_HEIGHT * FONT_WH / font_height);
       // A small margin on the right side prevent false print results
       screen_max = SCREEN_HEIGHT-2;
       break;
